@@ -2,3 +2,5 @@
 *.tmcpr
 *.mcpr
 .git/*
+.gitignore
+.gitattributes
