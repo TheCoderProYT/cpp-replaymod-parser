@@ -56,6 +56,8 @@ std::string modeNames[4] = {
 };
 
 int main(int argc, const char** argv) {
+  FILE *fileOutput;
+  fileOutput = fopen("out.txt", "w");
   if(argc<2) {
     printf("Usage: %s file\nFile has to be valid .tmcpr file, does not support .mcpr files yet.\n",argv[0]);
     exit(1);
@@ -107,7 +109,7 @@ int main(int argc, const char** argv) {
 
     char* buf;
 
-    fprintf(stderr,"\rProcessing: %s / %s [%f%%] (%s packets)",printFileSize(tellg),filesizeFormatted,100*(tellg/(float)filesize),printBigNum(chunks));
+    printf("Processing: %s / %s [%f%%] (%s packets and %s unknown packet types)\r",printFileSize(tellg),filesizeFormatted,100*(tellg/(float)filesize),printBigNum(chunks),printBigNum(unknownPackets.size()));
     std::cerr << std::flush;
     auto readVarInt = [data,&ptr]() {
       uint32_t v = 0;
@@ -125,15 +127,15 @@ int main(int argc, const char** argv) {
       return v;
     };
 
-    printf("[%i] Packet at timestamp %.3fs [length %s] at [%s / %s]: \n",chunks-1,timestamp/1000.0f,printFileSize(length),printFileSize(tellg-8-length),filesizeFormatted);
-    printf("Current mode: %i [%s]\n",connectionState,modeNames[connectionState].c_str());
+    fprintf(fileOutput,"[%i] Packet at timestamp %.3fs [length %s] at [%s / %s]: \n",chunks-1,timestamp/1000.0f,printFileSize(length),printFileSize(tellg-8-length),filesizeFormatted);
+    fprintf(fileOutput,"Current mode: %i [%s]\n",connectionState,modeNames[connectionState].c_str());
     int packetID = readVarInt();
-    printf("Packet ID: 0x%x\n",packetID);
+    fprintf(fileOutput,"Packet ID: 0x%x\n",packetID);
     switch(connectionState) {
       case 2:
         switch(packetID) {
           case 0x2:
-            printf("Login packet\n");
+            fprintf(fileOutput,"Login packet\n");
           break;
           default:
             goto invalidPacket;
@@ -148,7 +150,7 @@ int main(int argc, const char** argv) {
         }
       break;
       default:
-      fprintf(stderr,"\rInvalid state %i!\n",connectionState);
+      printf("\rInvalid state %i!\n",connectionState);
       exit(1);
     }
     goto fin;
@@ -156,51 +158,14 @@ int main(int argc, const char** argv) {
     if(!unknownPackets.contains(((int64_t)connectionState<<32)|packetID)) {
       unknownPackets.insert(((int64_t)connectionState<<32)|packetID);
     }
-    fin:; 
-    printf("\n");
+    fin:;
+    fprintf(fileOutput,"\n");
   }
-
-  // int pointer = 0;
-  // //printf("%02x\n",buf[3]);
-  // int pSize = 0;
-  // while(pointer < filesize) {
-  //   uint32_t timestamp = 0;
-  //   timestamp+=buf[pointer++];
-  //   timestamp*=256;
-  //   timestamp+=buf[pointer++];
-  //   timestamp*=256;
-  //   timestamp+=buf[pointer++];
-  //   timestamp*=256;
-  //   timestamp+=buf[pointer++];
-  //   uint32_t length = 0;
-  //   length+=buf[pointer++];
-  //   length*=256;
-  //   length+=buf[pointer++];
-  //   length*=256;
-  //   length+=buf[pointer++];
-  //   length*=256;
-  //   length+=buf[pointer++];
-  //   if(length > pSize) {
-  //     pSize=length;
-  //   }
-  //   uint8_t* data = new uint8_t[length];
-  //   memcpy(data,buf+pointer,length);
-  //   pointer+=length;
-  //   fprintf(stderr,"\rProcessing : %s / %s [%f%%]               ",printFileSize(pointer),filesizeFormatted,100*(pointer/(float)filesize));
-  //   std::cerr << std::flush;
-  //   int ptr = 0;
-  //
-  //   printf("[%s / %s] Packet at time %ul has size %ul and ",printFileSize(pointer-8),filesizeFormatted,timestamp,length);
-  //
-  //   int packetID = readVarInt();
-  //   printf("packet id of %x\n",packetID);
-  //   //printf("\n");
-  //   std::cout << std::flush;
-  // }
-  fprintf(stderr,"\n");
+  
+  printf("\n");
   for(std::set<uint64_t>::iterator i = unknownPackets.begin(); i != unknownPackets.end(); i++) {
     uint64_t x = (*i);
-    fprintf(stderr,"%llx %llx\n",x>>32,x&0xffffffff);
+    printf("%llx %llx\n",x>>32,x&0xffffffff);
 
   }
 }

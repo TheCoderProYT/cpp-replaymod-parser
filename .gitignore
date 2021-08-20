@@ -3,3 +3,5 @@
 *.mcpr
 .git/*
 .DS_Store
+out.txt
+replays/*
