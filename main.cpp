@@ -151,7 +151,7 @@ int main(int argc, const char** argv) {
       break;
       default:
       printf("\rInvalid state %i!\n",connectionState);
-      exit(1);
+      goto error;
     }
     goto fin;
     invalidPacket:;
@@ -161,11 +161,12 @@ int main(int argc, const char** argv) {
     fin:;
     fprintf(fileOutput,"\n");
   }
-  
   printf("\n");
   for(std::set<uint64_t>::iterator i = unknownPackets.begin(); i != unknownPackets.end(); i++) {
     uint64_t x = (*i);
     printf("%llx %llx\n",x>>32,x&0xffffffff);
-
   }
+  error:
+  fclose(fileOutput);
+  exit(1);
 }
