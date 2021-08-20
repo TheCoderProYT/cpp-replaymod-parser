@@ -101,7 +101,7 @@ int main(int argc, const char** argv) {
     length*=256;
     length+=data[7];
 
-    bzero(data,4000000);
+    memset(data,0,4000000);
     file.read((char*)data, length);
     tellg+=length;
     tellg+=8;
