@@ -5,3 +5,6 @@
 .DS_Store
 out.txt
 replays/*
+rm_parser
+.gitignore
+.gitattributes
