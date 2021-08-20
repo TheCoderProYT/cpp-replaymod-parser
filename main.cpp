@@ -6,6 +6,7 @@
 #include <thread>
 #include <fstream>
 #include <set>
+#include <cstring>
 
 std::string fileSizeSuffixes[5] = {
   "B",
@@ -101,7 +102,7 @@ int main(int argc, const char** argv) {
     length*=256;
     length+=data[7];
 
-    memset(data,0,4000000);
+    std::memset(data,0,4000000);
     file.read((char*)data, length);
     tellg+=length;
     tellg+=8;
