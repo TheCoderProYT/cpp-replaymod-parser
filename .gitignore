@@ -2,3 +2,4 @@
 *.tmcpr
 *.mcpr
 .git/*
+.DS_Store
