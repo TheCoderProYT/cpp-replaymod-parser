@@ -60,12 +60,12 @@ int main(int argc, const char** argv) {
   FILE *fileOutput;
   fileOutput = fopen("out.txt", "w");
   if(argc<2) {
-    printf("Usage: %s file\nFile has to be valid .tmcpr file, does not support .mcpr files yet.\n",argv[0]);
+    printf("Usage: %s folder\nFolder has to be extracted replay folder, this program doesn't support .mcpr files yet.\nCurrent version support: \n - 1.17.1\n",argv[0]);
     exit(1);
   }
-  std::ifstream file(argv[1],std::ios::binary|std::ios::in);
+  std::ifstream file(std::string(argv[1])+"/recording.tmcpr",std::ios::binary|std::ios::in);
   if(!file.is_open()) {
-    printf("Error reading file %s\nDoes the file actually exist?\n",argv[1]);
+    printf("Error reading file %s/recording.tmcpr\nDoes the file actually exist?\n",argv[1]);
     exit(1);
   }
   file.seekg(0,std::ios::end);
@@ -102,7 +102,9 @@ int main(int argc, const char** argv) {
     length*=256;
     length+=data[7];
 
-    std::xmemset(data,0,4000000);
+    for(int i = 0; i < length; i++) {
+      data[i]=0;
+    }
     file.read((char*)data, length);
     tellg+=length;
     tellg+=8;
@@ -137,6 +139,7 @@ int main(int argc, const char** argv) {
         switch(packetID) {
           case 0x2:
             fprintf(fileOutput,"Login Success\n");
+
           break;
           default:
             goto invalidPacket;
