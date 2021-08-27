@@ -8,6 +8,10 @@
 #include <set>
 #include <cstring>
 
+typedef void (*packet_parsing_func)(uint32_t,uint8_t*);
+
+FILE* fileOutput;
+
 std::string fileSizeSuffixes[5] = {
   "B",
   "KB",
@@ -22,6 +26,7 @@ std::string bigNumSuffixes[5] = {
   "G",
   "T"
 };
+
 char * printFileSize(size_t fileSize) {
   float fsD = (float)fileSize;
   char* buf = new char[256];
@@ -56,8 +61,13 @@ std::string modeNames[4] = {
   "PLAY"
 };
 
+void LOGIN_LOGINSUCCESS(uint32_t size, uint8_t* data) {
+
+}
+
+
+
 int main(int argc, const char** argv) {
-  FILE *fileOutput;
   fileOutput = fopen("out.txt", "w");
   if(argc<2) {
     printf("Usage: %s folder\nFolder has to be extracted replay folder, this program doesn't support .mcpr files yet.\nCurrent version support: \n - 1.17.1\n",argv[0]);
@@ -138,6 +148,7 @@ int main(int argc, const char** argv) {
       case 2:
         switch(packetID) {
           case 0x2:
+            LOGIN_LOGINSUCCESS(length,data);
             fprintf(fileOutput,"Login Success\n");
 
           break;
