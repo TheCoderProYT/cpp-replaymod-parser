@@ -102,7 +102,7 @@ int main(int argc, const char** argv) {
     length*=256;
     length+=data[7];
 
-    std::memset(data,0,4000000);
+    std::xmemset(data,0,4000000);
     file.read((char*)data, length);
     tellg+=length;
     tellg+=8;
@@ -136,7 +136,7 @@ int main(int argc, const char** argv) {
       case 2:
         switch(packetID) {
           case 0x2:
-            fprintf(fileOutput,"Login packet\n");
+            fprintf(fileOutput,"Login Success\n");
           break;
           default:
             goto invalidPacket;
