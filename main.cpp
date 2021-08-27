@@ -13,6 +13,8 @@
 
 FILE* fileOutput;
 
+uint32_t length;
+uint8_t* data;
 
 std::string modeNames[4] = {
   "HANDSHAKE",
@@ -21,9 +23,7 @@ std::string modeNames[4] = {
   "PLAY"
 };
 
-void LOGIN_LOGINSUCCESS(uint32_t size, uint8_t* data) {
-  fprintf(fileOutput,"Login Success\n");
-}
+#include "include/packets.hpp"
 
 #include "include/protocolInfoStruct.hpp"
 #include "protocolInfo.hpp"
@@ -43,7 +43,7 @@ int main(int argc, const char** argv) {
   size_t filesize = file.tellg();
   char * filesizeFormatted = printFileSize(filesize);
   file.seekg(0,std::ios::beg);
-  uint8_t* data = new uint8_t[4000000];
+  data = new uint8_t[4000000];
   int chunks = 0;
   int tellg = 0;
 
@@ -64,7 +64,7 @@ int main(int argc, const char** argv) {
     timestamp*=256;
     timestamp+=data[3];
 
-    uint32_t length = 0;
+    length = 0;
     length+=data[4];
     length*=256;
     length+=data[5];
@@ -85,7 +85,7 @@ int main(int argc, const char** argv) {
 
     printf("Processing: %s / %s [%f%%] (%s packets and %s unknown packet types)\r",printFileSize(tellg),filesizeFormatted,100*(tellg/(float)filesize),printBigNum(chunks),printBigNum(unknownPackets.size()));
     std::cerr << std::flush;
-    auto readVarInt = [data,&ptr]() {
+    auto readVarInt = [&ptr]() {
       uint32_t v = 0;
      	int bitOffset = 0;
       uint8_t currentByte;
@@ -109,7 +109,7 @@ int main(int argc, const char** argv) {
       case 2:
         switch(packetID) {
           case 0x2:
-            LOGIN_LOGINSUCCESS(length,data);
+            LOGIN_LOGINSUCCESS();
             fprintf(fileOutput,"Login Success\n");
 
           break;

@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string>
 
-typedef void (*packet_parsing_func)(uint32_t,uint8_t*);
+typedef void (*packet_parsing_func)(void);
 
 struct ProtocolInfo {
   uint32_t id;
