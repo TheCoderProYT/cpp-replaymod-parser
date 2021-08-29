@@ -3,8 +3,14 @@
 #include <vector>
 #include "include/protocolInfoStruct.hpp"
 
-std::vector<ProtocolInfo> protocols = {
-  {756,"1.17.1",{
-    {0x0000000200000002,LOGIN_LOGINSUCCESS}
-  }},
+std::unordered_map<uint32_t,ProtocolInfo> protocols = {
+  {756,{"1.17.1",{
+    {2,{"LOGIN",{
+      {0x02,{"Login Success",LOGIN_LOGINSUCCESS}},
+    }}},
+    {3,{"PLAY",{
+      {0x36,{"Player Info",PLAY_PLAYERINFO}},
+    }}},
+
+  }}},
 };

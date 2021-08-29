@@ -1,3 +1,5 @@
+#pragma once
+
 void LOGIN_LOGINSUCCESS() {
   UUID playerUUID = readUUID();
   std::string playerString = readString();

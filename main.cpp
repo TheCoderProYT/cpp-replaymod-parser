@@ -12,7 +12,6 @@
 #include "include/printBigNum.hpp"
 #include "include/processJSONLine.hpp"
 
-
 FILE* fileOutput;
 
 uint32_t length;
@@ -20,13 +19,18 @@ uint8_t* data;
 uint32_t protocolNumber = 0;
 
 uint32_t ptr = 0;
+#include "include/parseNumbers.hpp"
+
+#include "include/protocolInfoStruct.hpp"
+ProtocolInfo protocol;
 
 int connectionState = 2;
 
-#include "include/parseNumbers.hpp"
 #include "include/packets.hpp"
-#include "include/protocolInfoStruct.hpp"
 #include "protocolInfo.hpp"
+
+#include "include/gameState/gameState.hpp"
+GameState currentState;
 
 int main(int argc, const char** argv) {
   std::string modeNames[4] = {
@@ -58,11 +62,14 @@ int main(int argc, const char** argv) {
   std::unordered_map<std::string,std::string> metaDataJSON = processJSONLine(line);
   sscanf(metaDataJSON["protocol"].c_str(),"%i",&protocolNumber);
 
-  printf("Protocol detected: %i",protocolNumber);
-
-  for(std::vector<ProtocolInfo>::iterator i = protocols.begin(); i != protocols.end(); i++) {
-    ProtocolInfo c = *i;
+  if(protocols.count(protocolNumber)==0) {
+    printf("ERROR: Protocol %i not supported yet!\n",protocolNumber);
+    file.close();
+    exit(1);
   }
+
+  protocol=protocols[protocolNumber];
+  printf("Protocol detected: %i (%s)\n",protocolNumber,protocol.name.c_str());
 
   file.close();
 
@@ -118,45 +125,29 @@ int main(int argc, const char** argv) {
     std::cerr << std::flush;
 
     fprintf(fileOutput,"[%i] Packet at timestamp %.3fs [length %s] at [%s / %s]: \n",chunks-1,timestamp/1000.0f,printFileSize(length),printFileSize(tellg-8-length),filesizeFormatted);
-    fprintf(fileOutput,"Current mode: %i [%s]\n",connectionState,modeNames[connectionState].c_str());
+    if(protocol.modes.count(connectionState)==0) {
+      printf("\nERROR: Invalid state: %i\n",connectionState);
+      file.close();
+      exit(1);
+    }
+    fprintf(fileOutput,"Current mode: %i [%s]\n",connectionState,protocol.modes[connectionState].name.c_str());
     int packetID = readVarInt();
-    fprintf(fileOutput,"Packet ID: 0x%x\n",packetID);
-    switch(connectionState) {
-      case 2:
-        switch(packetID) {
-          case 0x2:
-            LOGIN_LOGINSUCCESS();
-          break;
-          default:
-            goto invalidPacket;
-          break;
-        }
-      break;
-      case 3:
-        switch(packetID) {
-          default:
-            goto invalidPacket;
-          break;
-        }
-      break;
-      default:
-      printf("\rInvalid state %i!\n",connectionState);
-      goto error;
+    if(protocol.modes[connectionState].functions.count(packetID)==0) {
+      fprintf(fileOutput,"Packet ID: 0x%x [Unknown packet]\n\n",packetID);
+      if(!unknownPackets.contains(((int64_t)connectionState<<32)|packetID)) {
+        unknownPackets.insert(((int64_t)connectionState<<32)|packetID);
+      }
+      continue;
     }
-    goto fin;
-    invalidPacket:;
-    if(!unknownPackets.contains(((int64_t)connectionState<<32)|packetID)) {
-      unknownPackets.insert(((int64_t)connectionState<<32)|packetID);
-    }
-    fin:;
+    fprintf(fileOutput,"Packet ID: 0x%x [%s]\n",packetID,protocol.modes[connectionState].functions[packetID].name.c_str());
+
+    protocol.modes[connectionState].functions[packetID]();
+
     fprintf(fileOutput,"\n");
   }
   printf("\n");
   for(std::set<uint64_t>::iterator i = unknownPackets.begin(); i != unknownPackets.end(); i++) {
     uint64_t x = (*i);
-    printf("%llx %llx\n",x>>32,x&0xffffffff);
+    printf("%s:0x%llx\n",protocol.modes[x>>32].name.c_str(),x&0xffffffff);
   }
-  error:
-  fclose(fileOutput);
-  exit(1);
 }

@@ -1,3 +1,5 @@
+#pragma once
+
 struct UUID {
   uint8_t uuid[16];
   UUID() {
