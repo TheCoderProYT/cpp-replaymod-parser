@@ -1,3 +1,6 @@
 void LOGIN_LOGINSUCCESS() {
-  fprintf(fileOutput,"Login Success\n");
+  UUID playerUUID = readUUID();
+  std::string playerString = readString();
+  fprintf(fileOutput,"Login Success for \"%s\" (%s)\n",playerString.c_str(),playerUUID.toString());
+  connectionState=3;
 }

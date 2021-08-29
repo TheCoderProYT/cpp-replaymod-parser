@@ -10,44 +10,75 @@
 #include <unordered_map>
 
 #include "include/printBigNum.hpp"
+#include "include/processJSONLine.hpp"
+
 
 FILE* fileOutput;
 
 uint32_t length;
 uint8_t* data;
+uint32_t protocolNumber = 0;
 
-std::string modeNames[4] = {
-  "HANDSHAKE",
-  "STATUS",
-  "LOGIN",
-  "PLAY"
-};
+uint32_t ptr = 0;
 
+int connectionState = 2;
+
+#include "include/parseNumbers.hpp"
 #include "include/packets.hpp"
-
 #include "include/protocolInfoStruct.hpp"
 #include "protocolInfo.hpp"
 
 int main(int argc, const char** argv) {
+  std::string modeNames[4] = {
+    "HANDSHAKE",
+    "STATUS",
+    "LOGIN",
+    "PLAY"
+  };
   fileOutput = fopen("out.txt", "w");
   if(argc<2) {
     printf("Usage: %s folder\nFolder has to be extracted replay folder, this program doesn't support .mcpr files yet.\nCurrent version support: \n - 1.17.1\n",argv[0]);
     exit(1);
   }
-  std::ifstream file(std::string(argv[1])+"/recording.tmcpr",std::ios::binary|std::ios::in);
+
+  size_t filesize;
+
+  std::ifstream file;
+
+  file = std::ifstream(std::string(argv[1])+"/metaData.json",std::ios::binary|std::ios::in);
+  if(!file.is_open()) {
+    printf("Error reading file %s/metaData.json\nDoes the file actually exist?\n",argv[1]);
+    exit(1);
+  }
+
+  std::string line;
+  getline(file,line);
+  //std::cout << line << std::endl;
+
+  std::unordered_map<std::string,std::string> metaDataJSON = processJSONLine(line);
+  sscanf(metaDataJSON["protocol"].c_str(),"%i",&protocolNumber);
+
+  printf("Protocol detected: %i",protocolNumber);
+
+  for(std::vector<ProtocolInfo>::iterator i = protocols.begin(); i != protocols.end(); i++) {
+    ProtocolInfo c = *i;
+  }
+
+  file.close();
+
+  file = std::ifstream(std::string(argv[1])+"/recording.tmcpr",std::ios::binary|std::ios::in);
   if(!file.is_open()) {
     printf("Error reading file %s/recording.tmcpr\nDoes the file actually exist?\n",argv[1]);
     exit(1);
   }
   file.seekg(0,std::ios::end);
-  size_t filesize = file.tellg();
+  filesize = file.tellg();
   char * filesizeFormatted = printFileSize(filesize);
   file.seekg(0,std::ios::beg);
   data = new uint8_t[4000000];
   int chunks = 0;
   int tellg = 0;
 
-  int connectionState = 2;
   std::set<uint64_t> unknownPackets;
 
   while(tellg<filesize) {
@@ -79,27 +110,12 @@ int main(int argc, const char** argv) {
     file.read((char*)data, length);
     tellg+=length;
     tellg+=8;
-    int ptr = 0;
+    ptr = 0;
 
     char* buf;
 
     printf("Processing: %s / %s [%f%%] (%s packets and %s unknown packet types)\r",printFileSize(tellg),filesizeFormatted,100*(tellg/(float)filesize),printBigNum(chunks),printBigNum(unknownPackets.size()));
     std::cerr << std::flush;
-    auto readVarInt = [&ptr]() {
-      uint32_t v = 0;
-     	int bitOffset = 0;
-      uint8_t currentByte;
-      do {
-        if (bitOffset == 35) {
-     			printf("VarInt read error!\n");
-     			exit(1);
-     		}
-     		currentByte = data[ptr++];
-        v |= (currentByte & 0b01111111) << bitOffset;
-    		bitOffset += 7;
-      } while ((currentByte & 0b10000000) != 0);
-      return v;
-    };
 
     fprintf(fileOutput,"[%i] Packet at timestamp %.3fs [length %s] at [%s / %s]: \n",chunks-1,timestamp/1000.0f,printFileSize(length),printFileSize(tellg-8-length),filesizeFormatted);
     fprintf(fileOutput,"Current mode: %i [%s]\n",connectionState,modeNames[connectionState].c_str());
@@ -110,8 +126,6 @@ int main(int argc, const char** argv) {
         switch(packetID) {
           case 0x2:
             LOGIN_LOGINSUCCESS();
-            fprintf(fileOutput,"Login Success\n");
-
           break;
           default:
             goto invalidPacket;
