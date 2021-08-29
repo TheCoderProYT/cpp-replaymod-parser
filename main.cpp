@@ -26,11 +26,11 @@ ProtocolInfo protocol;
 
 int connectionState = 2;
 
-#include "include/packets.hpp"
-#include "protocolInfo.hpp"
-
 #include "include/gameState/gameState.hpp"
 GameState currentState;
+
+#include "include/packets.hpp"
+#include "protocolInfo.hpp"
 
 int main(int argc, const char** argv) {
   std::string modeNames[4] = {
@@ -60,6 +60,10 @@ int main(int argc, const char** argv) {
   //std::cout << line << std::endl;
 
   std::unordered_map<std::string,std::string> metaDataJSON = processJSONLine(line);
+  if(metaDataJSON.count("protocol")==0) {
+    printf("ERROR: Protocol number not specified in JSON file.\n");
+    exit(1);
+  }
   sscanf(metaDataJSON["protocol"].c_str(),"%i",&protocolNumber);
 
   if(protocols.count(protocolNumber)==0) {
@@ -70,6 +74,16 @@ int main(int argc, const char** argv) {
 
   protocol=protocols[protocolNumber];
   printf("Protocol detected: %i (%s)\n",protocolNumber,protocol.name.c_str());
+
+  if(metaDataJSON.count("duration")==0) {
+    printf("ERROR: Protocol number not specified in JSON file.\n");
+    exit(1);
+  }
+
+  double replayTotalLength;
+  sscanf(metaDataJSON["duration"].c_str(),"%lf",&replayTotalLength);
+  printf("Total replay duration: %.3f\n",replayTotalLength/1000.0);
+
 
   file.close();
 
@@ -121,7 +135,7 @@ int main(int argc, const char** argv) {
 
     char* buf;
 
-    printf("Processing: %s / %s [%f%%] (%s packets and %s unknown packet types)\r",printFileSize(tellg),filesizeFormatted,100*(tellg/(float)filesize),printBigNum(chunks),printBigNum(unknownPackets.size()));
+    printf("Processing: %s / %s [%f%%] at time %.3lf/%.3lf (%s packets and %s unknown packet types)\r",printFileSize(tellg),filesizeFormatted,100*(tellg/(float)filesize),timestamp/1000.0,replayTotalLength/1000.0,printBigNum(chunks),printBigNum(unknownPackets.size()));
     std::cerr << std::flush;
 
     fprintf(fileOutput,"[%i] Packet at timestamp %.3fs [length %s] at [%s / %s]: \n",chunks-1,timestamp/1000.0f,printFileSize(length),printFileSize(tellg-8-length),filesizeFormatted);
@@ -145,9 +159,9 @@ int main(int argc, const char** argv) {
 
     fprintf(fileOutput,"\n");
   }
-  printf("\n");
+  printf("\n\nUnknown packet IDs (please report to GitHub): \n");
   for(std::set<uint64_t>::iterator i = unknownPackets.begin(); i != unknownPackets.end(); i++) {
     uint64_t x = (*i);
-    printf("%s:0x%llx\n",protocol.modes[x>>32].name.c_str(),x&0xffffffff);
+    printf("[%s:0x%llx]\n",protocol.modes[x>>32].name.c_str(),x&0xffffffff);
   }
 }
