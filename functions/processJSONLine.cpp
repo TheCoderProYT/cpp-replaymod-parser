@@ -2,24 +2,24 @@
 
 std::unordered_map<std::string,std::string> processJSONLine(std::string inp) {
   std::unordered_map<std::string,std::string> output;
-  std::string x="";
-  std::string y="";
+  std::string key_tmp="";
+  std::string value_tmp="";
   int a = 1;
   int b = 0;
   for(int i = 2; i < inp.length(); i++) {
     if(i==inp.length()-1) {a=0;}
     switch(a) {
       case 0:
-      output[x]=y;
+      output[key_tmp]=value_tmp;
       //printf("%s: %s\n",x.c_str(),y.c_str());
-      x="";
-      y="";
+      key_tmp="";
+      value_tmp="";
       a=1;
       break;
       case 1:
       if(inp[i]=='\\') {b=a;a=10;} else
       if(inp[i]=='"') {a=2;} else {
-        x+=inp[i];
+        key_tmp+=inp[i];
       }
       break;
       case 2:
@@ -28,13 +28,13 @@ std::unordered_map<std::string,std::string> processJSONLine(std::string inp) {
       case 3:
       if(inp[i]=='\\') {b=a;a=11;} else
       if(inp[i]==',') {a=0;} else {
-        y+=inp[i];
+        value_tmp+=inp[i];
       }
       break;
       case 10:
       switch(inp[i]) {
         default:
-        x+=inp[i];
+        key_tmp+=inp[i];
         break;
       }
       a=b;
@@ -42,7 +42,7 @@ std::unordered_map<std::string,std::string> processJSONLine(std::string inp) {
       case 11:
       switch(inp[i]) {
         default:
-        y+=inp[i];
+        value_tmp+=inp[i];
         break;
       }
       a=b;
