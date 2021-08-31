@@ -1,7 +1,4 @@
-#pragma once
-
-#include <string>
-#include <vector>
+#include "processJSONLine.hpp"
 
 std::unordered_map<std::string,std::string> processJSONLine(std::string inp) {
   std::unordered_map<std::string,std::string> output;

@@ -10,3 +10,4 @@ rm_parser
 .gitattributes
 .vscode/*
 .vscode
+bin/*

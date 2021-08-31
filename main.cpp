@@ -31,7 +31,7 @@
 #include "include/globalVariables.hpp"
 
 #include "include/printBigNum.hpp"
-#include "include/processJSONLine.hpp"
+#include "functions/processJSONLine.hpp"
 
 FILE* fileOutput;
 
