@@ -23,7 +23,7 @@ void PLAY_PLAYERINFO() {
       case 0:
         for(x=0;x<currentState.tabPlayers.size();x++) {
           if(currentState.tabPlayers[x].uuid==playerUUID) {
-            fprintf(fileOutput,"UUID %s already loaded! Removing...\n",playerUUID.toString());
+            fprintf(fileOutput,"UUID %s already loaded! Overwriting...\n",playerUUID.toString());
             currentState.tabPlayers.erase(currentState.tabPlayers.begin()+x);
             break;
           }

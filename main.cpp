@@ -17,7 +17,6 @@
 
 
 */
-
 #include <iostream>
 #include <unistd.h>
 #include <cstdint>
@@ -55,12 +54,6 @@ GameState currentState;
 #include "protocolInfo.hpp"
 
 int main(int argc, const char** argv) {
-  std::string modeNames[4] = {
-    "HANDSHAKE",
-    "STATUS",
-    "LOGIN",
-    "PLAY"
-  };
   fileOutput = fopen("out.txt", "w");
   if(argc<2) {
     printf("Usage: %s folder\nFolder has to be extracted replay folder, this program doesn't support .mcpr files yet.\nCurrent version support: \n - 1.17.1\n",argv[0]);
@@ -182,8 +175,33 @@ int main(int argc, const char** argv) {
     fprintf(fileOutput,"\n");
   }
   printf("\n\nUnknown packet IDs (please report to GitHub): \n");
+  std::unordered_map<uint32_t,uint32_t> maximum;
+  uint32_t max = 0;
   for(std::set<uint64_t>::iterator i = unknownPackets.begin(); i != unknownPackets.end(); i++) {
     uint64_t x = (*i);
-    printf("[%s:0x%llx]\n",protocol.modes[x>>32].name.c_str(),x&0xffffffff);
+    if(maximum.count(x>>32)==0) {
+      maximum[x>>32]=0;
+    }
+    maximum[x>>32]=((x&0xffffffff)>maximum[x>>32])?x&0xffffffff:maximum[x>>32];
+    max=(x>>32)>max?x>>32:max;
+    //printf("[%s:0x%llx]\n",protocol.modes[x>>32].name.c_str(),x&0xffffffff);
+  }
+  for(int i = 0; i <= max; i++) {
+    if(maximum.count(i)==0) {continue;}
+    if(protocol.modes.count(i)==0) {
+      printf("UNKNOWN%X",i);
+    } else {
+      printf("%s",protocol.modes[i].name.c_str());
+    }
+    printf(": ");
+    for(int j = 0; j <= maximum[i]; j++) {
+      for(uint64_t x : unknownPackets) {
+        if((x>>32)!=i) {continue;}
+        if((x&0xffffffff)!=j) {continue;}
+        printf("%X ",j);
+        break;
+      }
+    }
+    printf("\n");
   }
 }
