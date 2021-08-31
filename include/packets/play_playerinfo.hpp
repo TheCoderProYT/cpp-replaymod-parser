@@ -16,26 +16,26 @@ void PLAY_PLAYERINFO() {
     fprintf(fileOutput,"%i:\n",i);
     UUID playerUUID = readUUID();
     PlayerInfoObject playerObject;
-    int x;
-    int y;
-    PlayerInfoObject_Property abc;
+    int counter;
+    int value_tmp;
+    PlayerInfoObject_Property property_temp;
     switch(operation) {
       case 0:
-        for(x=0;x<currentState.tabPlayers.size();x++) {
-          if(currentState.tabPlayers[x].uuid==playerUUID) {
+        for(counter=0;counter<currentState.tabPlayers.size();counter++) {
+          if(currentState.tabPlayers[counter].uuid==playerUUID) {
             fprintf(fileOutput,"UUID %s already loaded! Overwriting...\n",playerUUID.toString());
-            currentState.tabPlayers.erase(currentState.tabPlayers.begin()+x);
+            currentState.tabPlayers.erase(currentState.tabPlayers.begin()+counter);
             break;
           }
         }
         playerObject.uuid=playerUUID;
         playerObject.name=readString();
-        for(x=readVarInt()-1;x>=0;x--) {
-          abc=PlayerInfoObject_Property();
-          abc.name=readString();
-          abc.value=readString();
-          abc.signature=readString(readBoolean());
-          playerObject.properties.push_back(abc);
+        for(counter=readVarInt()-1;counter>=0;counter--) {
+          property_temp=PlayerInfoObject_Property();
+          property_temp.name=readString();
+          property_temp.value=readString();
+          property_temp.signature=readString(readBoolean());
+          playerObject.properties.push_back(property_temp);
         }
         playerObject.gamemode=readVarInt();
         playerObject.ping=readVarInt();
@@ -44,32 +44,32 @@ void PLAY_PLAYERINFO() {
         currentState.tabPlayers.push_back(playerObject);
       break;
       case 1:
-        y=readVarInt();
-        for(x=0;x<currentState.tabPlayers.size();x++) {
-          if(currentState.tabPlayers[x].uuid==playerUUID) {
-            fprintf(fileOutput,"Set gamemode %s (%i) for UUID %s (%s)",possibleGamemodes[((y>=0)&&(y<4))?y:4].c_str(),y,playerUUID.toString(),currentState.tabPlayers[x].name.c_str());
-            currentState.tabPlayers[x].gamemode=y;
+        value_tmp=readVarInt();
+        for(counter=0;counter<currentState.tabPlayers.size();counter++) {
+          if(currentState.tabPlayers[counter].uuid==playerUUID) {
+            fprintf(fileOutput,"Set gamemode %s (%i) for UUID %s (%s)",possibleGamemodes[((value_tmp>=0)&&(value_tmp<4))?value_tmp:4].c_str(),value_tmp,playerUUID.toString(),currentState.tabPlayers[counter].name.c_str());
+            currentState.tabPlayers[counter].gamemode=value_tmp;
             goto PLAY_PLAYERINFO_LABEL1;
           }
         }
-        fprintf(fileOutput,"Error: Cannot set gamemode %s (%i) for UUID %s: UUID not loaded\n",possibleGamemodes[((y>=0)&&(y<4))?y:4].c_str(),y,playerUUID.toString());
+        fprintf(fileOutput,"Error: Cannot set gamemode %s (%i) for UUID %s: UUID not loaded\n",possibleGamemodes[((value_tmp>=0)&&(value_tmp<4))?value_tmp:4].c_str(),value_tmp,playerUUID.toString());
       break;
       case 2:
-        y=readVarInt();
-        for(x=0;x<currentState.tabPlayers.size();x++) {
-          if(currentState.tabPlayers[x].uuid==playerUUID) {
-            fprintf(fileOutput,"Set ping to %i for UUID %s (%s)",y,playerUUID.toString(),currentState.tabPlayers[x].name.c_str());
-            currentState.tabPlayers[x].ping=y;
+        value_tmp=readVarInt();
+        for(counter=0;counter<currentState.tabPlayers.size();counter++) {
+          if(currentState.tabPlayers[counter].uuid==playerUUID) {
+            fprintf(fileOutput,"Set ping to %i for UUID %s (%s)",value_tmp,playerUUID.toString(),currentState.tabPlayers[counter].name.c_str());
+            currentState.tabPlayers[counter].ping=value_tmp;
             goto PLAY_PLAYERINFO_LABEL1;
           }
         }
-        fprintf(fileOutput,"Error: Cannot set gamemode %s (%i) for UUID %s: UUID not loaded\n",possibleGamemodes[((y>=0)&&(y<4))?y:4].c_str(),y,playerUUID.toString());
+        fprintf(fileOutput,"Error: Cannot set gamemode %s (%i) for UUID %s: UUID not loaded\n",possibleGamemodes[((value_tmp>=0)&&(value_tmp<4))?value_tmp:4].c_str(),value_tmp,playerUUID.toString());
       break;
       case 4:
-        for(x=0;x<currentState.tabPlayers.size();x++) {
-          if(currentState.tabPlayers[x].uuid==playerUUID) {
-            fprintf(fileOutput,"%s",currentState.tabPlayers[x].toString());
-            currentState.tabPlayers.erase(currentState.tabPlayers.begin()+x);
+        for(counter=0;counter<currentState.tabPlayers.size();counter++) {
+          if(currentState.tabPlayers[counter].uuid==playerUUID) {
+            fprintf(fileOutput,"%s",currentState.tabPlayers[counter].toString());
+            currentState.tabPlayers.erase(currentState.tabPlayers.begin()+counter);
             goto PLAY_PLAYERINFO_LABEL1;
           }
         }
