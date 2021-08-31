@@ -1,3 +1,23 @@
+/*
+   CPP-ReplayMod-Parser, a tool for parsing and processing ReplayMod replays
+   Copyright (C) 2021 TheCoderPro
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+*/
+
 #include <iostream>
 #include <unistd.h>
 #include <cstdint>
@@ -8,6 +28,8 @@
 #include <set>
 #include <cstring>
 #include <unordered_map>
+
+#include "include/globalVariables.hpp"
 
 #include "include/printBigNum.hpp"
 #include "include/processJSONLine.hpp"
@@ -82,7 +104,7 @@ int main(int argc, const char** argv) {
 
   double replayTotalLength;
   sscanf(metaDataJSON["duration"].c_str(),"%lf",&replayTotalLength);
-  printf("Total replay duration: %.3f\n",replayTotalLength/1000.0);
+  printf("Total replay duration: %.3f seconds\n",replayTotalLength/1000.0);
 
 
   file.close();
@@ -135,10 +157,10 @@ int main(int argc, const char** argv) {
 
     char* buf;
 
-    printf("Processing: %s / %s [%f%%] at time %.3lf/%.3lf (%s packets and %s unknown packet types)\r",printFileSize(tellg),filesizeFormatted,100*(tellg/(float)filesize),timestamp/1000.0,replayTotalLength/1000.0,printBigNum(chunks),printBigNum(unknownPackets.size()));
+    printf("Processing: %s / %s [%f%%] at time %.3lfs/%.3lfs (%s packets and %s unknown packet types)\r",printFileSize(tellg),filesizeFormatted,100*(tellg/(float)filesize),timestamp/1000.0,replayTotalLength/1000.0,printBigNum(chunks),printBigNum(unknownPackets.size()));
     std::cerr << std::flush;
 
-    fprintf(fileOutput,"[%i] Packet at timestamp %.3fs [length %s] at [%s / %s]: \n",chunks-1,timestamp/1000.0f,printFileSize(length),printFileSize(tellg-8-length),filesizeFormatted);
+    fprintf(fileOutput,"[%i] Packet at timestamp %.3fs [length %s] at [%s (%i) / %s]: \n",chunks-1,timestamp/1000.0f,printFileSize(length),printFileSize(tellg-8-length),tellg-8-length,filesizeFormatted);
     if(protocol.modes.count(connectionState)==0) {
       printf("\nERROR: Invalid state: %i\n",connectionState);
       file.close();
