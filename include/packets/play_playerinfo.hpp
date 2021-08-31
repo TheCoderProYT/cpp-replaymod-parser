@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 std::string PLAY_PLAYERINFO_Operations[5] = {
   "Add player",
   "Update gamemode",
@@ -47,12 +49,12 @@ void PLAY_PLAYERINFO() {
         value_tmp=readVarInt();
         for(counter=0;counter<currentState.tabPlayers.size();counter++) {
           if(currentState.tabPlayers[counter].uuid==playerUUID) {
-            fprintf(fileOutput,"Set gamemode %s (%i) for UUID %s (%s)",possibleGamemodes[((value_tmp>=0)&&(value_tmp<4))?value_tmp:4].c_str(),value_tmp,playerUUID.toString(),currentState.tabPlayers[counter].name.c_str());
+            fprintf(fileOutput,"Set gamemode %s (%i) for UUID %s (%s)",possibleGamemodes[std::clamp(value_tmp,0,4)].c_str(),value_tmp,playerUUID.toString(),currentState.tabPlayers[counter].name.c_str());
             currentState.tabPlayers[counter].gamemode=value_tmp;
             goto PLAY_PLAYERINFO_LABEL1;
           }
         }
-        fprintf(fileOutput,"Error: Cannot set gamemode %s (%i) for UUID %s: UUID not loaded\n",possibleGamemodes[((value_tmp>=0)&&(value_tmp<4))?value_tmp:4].c_str(),value_tmp,playerUUID.toString());
+        fprintf(fileOutput,"Error: Cannot set gamemode %s (%i) for UUID %s: UUID not loaded\n",possibleGamemodes[std::clamp(value_tmp,0,4)].c_str(),value_tmp,playerUUID.toString());
       break;
       case 2:
         value_tmp=readVarInt();

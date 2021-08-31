@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 struct PlayerInfoObject_Property {
   std::string name;
   std::string value;
@@ -22,7 +24,7 @@ struct PlayerInfoObject {
   }
   char* toString() {
     char* array = (char*)malloc(2048);
-    sprintf(array,"UUID: %s\nUsername: %s\nGamemode: %s (%i)\nProperties: \n%sPing: %i\n%s%s%s",uuid.toString(),name.c_str(),possibleGamemodes[((gamemode>=0)&&(gamemode<4))?gamemode:4].c_str(),gamemode,printProperties().c_str(),ping,(displayName.length()>0)?"Display Name: ":"",displayName.c_str(),(displayName.length()>0)?"\n":"");
+    sprintf(array,"UUID: %s\nUsername: %s\nGamemode: %s (%i)\nProperties: \n%sPing: %i\n%s%s%s",uuid.toString(),name.c_str(),possibleGamemodes[std::clamp(gamemode,0,4)].c_str(),gamemode,printProperties().c_str(),ping,(displayName.length()>0)?"Display Name: ":"",displayName.c_str(),(displayName.length()>0)?"\n":"");
     return array;
   }
 };
