@@ -11,3 +11,4 @@ rm_parser
 .vscode/*
 .vscode
 bin/*
+*.tmp

@@ -30,8 +30,9 @@
 
 #include "include/globalVariables.hpp"
 
-#include "include/printBigNum.hpp"
 #include "functions/processJSONLine.hpp"
+#include "functions/printBigNumbers.hpp"
+
 
 FILE* fileOutput;
 

@@ -1,7 +1,4 @@
-#pragma once
-
-#include <string>
-#include <cstdint>
+#include "printBigNumbers.hpp"
 
 std::string fileSizeSuffixes[5] = {
   "B",

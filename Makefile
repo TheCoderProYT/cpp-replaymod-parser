@@ -1,10 +1,18 @@
 COMPILER = clang++ -std=c++2a
 
-rm_parser: bin/main.o bin/functions_processJSONLine.o Makefile
-	${COMPILER} bin/*.o -o rm_parser
+rm_parser: bin/*.o bin/functions/*.o Makefile
+	clear
+	${COMPILER} bin/*.o bin/functions/*.o -o rm_parser
+	
+.PHONY: clean
+clean: 
+	-rm -f bin/*.o bin/functions/*.o
 
-bin/functions_processJSONLine.o: functions/processJSONLine.*
-	${COMPILER} -c functions/processJSONLine.cpp -o bin/functions_processJSONLine.o
+bin/main.o: main.cpp
+	${COMPILER} -c $< -o $@
 
-bin/main.o: main.cpp include/* protocolInfo.hpp include/gameState/* include/packets/*
-	${COMPILER} -c main.cpp -o bin/main.o
+bin/%.o: %.cpp %.hpp
+	${COMPILER} -c $< -o $@
+
+bin/functions/%.o: functions/%.cpp functions/%.hpp
+	${COMPILER} -c $< -o $@
