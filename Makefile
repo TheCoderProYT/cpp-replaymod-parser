@@ -1,18 +1,17 @@
-COMPILER = clang++ -std=c++2a
+COMPILER	=	clang++ -std=c++2a -ferror-limit=1000
 
-rm_parser: bin/*.o bin/functions/*.o Makefile
+OBJECTS 	= 	bin/JSONObject.o bin/main.o bin/Packet.o bin/PacketStream.o bin/PrintBigNumbers.o bin/ProtocolInformation.o bin/State.o
+
+rm_parser: ${OBJECTS} Makefile
 	clear
-	${COMPILER} bin/*.o bin/functions/*.o -o rm_parser
+	-mkdir bin
+
+	${COMPILER} ${OBJECTS} -o rm_parser
 	
 .PHONY: clean
 clean: 
-	-rm -f bin/*.o bin/functions/*.o
-
-bin/main.o: main.cpp
-	${COMPILER} -c $< -o $@
+	-rm -rv bin
 
 bin/%.o: %.cpp %.hpp
-	${COMPILER} -c $< -o $@
-
-bin/functions/%.o: functions/%.cpp functions/%.hpp
+	-mkdir bin
 	${COMPILER} -c $< -o $@

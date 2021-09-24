@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "include/protocolInfoStruct.hpp"
+
 
 std::unordered_map<uint32_t,ProtocolInfo> protocols = {
   {756,{"1.17.1",{
