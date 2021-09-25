@@ -4,6 +4,11 @@ ProtocolFunction::ProtocolFunction() {
 
 }
 
+ProtocolFunction::ProtocolFunction(std::string a, packet_parsing_func b) {
+    name=a;
+    function=b;
+}
+
 ProtocolFunction::~ProtocolFunction() {
 
 }
@@ -14,6 +19,11 @@ void ProtocolFunction::operator()() {
 
 ProtocolMode::ProtocolMode() {
 
+}
+
+ProtocolMode::ProtocolMode(std::string a, std::unordered_map<uint32_t,ProtocolFunction> b) {
+    name=a;
+    functions=b;
 }
 
 ProtocolMode::~ProtocolMode() {
@@ -33,6 +43,11 @@ ProtocolInfo::ProtocolInfo() {
 
 }
 
+ProtocolInfo::ProtocolInfo(std::string a, std::unordered_map<uint32_t,ProtocolMode> b) {
+    name=a;
+    modes=b;
+}
+
 ProtocolInfo::~ProtocolInfo() {
 
 }
@@ -45,5 +60,3 @@ ProtocolMode* ProtocolInfo::operator[](uint32_t a) {
     if(!modeDefined(a)) {return nullptr;}
     return &modes[a];
 }
-
-ProtocolInfo protocols = {};

@@ -7,35 +7,35 @@
 typedef void (*packet_parsing_func)(void);
 
 class ProtocolFunction {
-private:
-    packet_parsing_func function;
 public:
     std::string name;
+    packet_parsing_func function;
 public:
     ProtocolFunction();
+    ProtocolFunction(std::string,packet_parsing_func);
     ~ProtocolFunction();
     void operator()();
 };
 
 struct ProtocolMode {
-private:
-    std::unordered_map<uint32_t,ProtocolFunction> functions;
 public:
     std::string name;
+    std::unordered_map<uint32_t,ProtocolFunction> functions;
 public:
     ProtocolMode();
+    ProtocolMode(std::string,std::unordered_map<uint32_t,ProtocolFunction>);
     ~ProtocolMode();
     bool functionDefined(uint32_t);
     ProtocolFunction* operator[](uint32_t);
 };
 
 class ProtocolInfo {
-private:
-    std::unordered_map<uint32_t,ProtocolMode> modes;
 public:
     std::string name;
+    std::unordered_map<uint32_t,ProtocolMode> modes;
 public:
     ProtocolInfo();
+    ProtocolInfo(std::string,std::unordered_map<uint32_t,ProtocolMode>);
     ~ProtocolInfo();
     bool modeDefined(uint32_t);
     ProtocolMode* operator[](uint32_t);

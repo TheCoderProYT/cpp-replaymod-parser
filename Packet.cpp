@@ -1,7 +1,5 @@
 #include "Packet.hpp"
 
-#include "packets/packets.hpp"
-
 Packet::Packet() {
 
 }

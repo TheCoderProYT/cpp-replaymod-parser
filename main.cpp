@@ -33,8 +33,9 @@
 #include "JSONObject.hpp"
 #include "ProtocolInformation.hpp"
 #include "PrintBigNumbers.hpp"
+#include "Protocols/Protocols.hpp"
 
-extern ProtocolInfo protocols;
+extern std::unordered_map<uint32_t,ProtocolInfo> protocols;
 
 State currentState;
 PacketStream packetStream;
@@ -73,12 +74,12 @@ int main(int argc, const char** argv) {
 
     sscanf(metaDataJSON["protocol"].c_str(),"%i",&protocolNumber);
 
-    if(!protocols.modeDefined(protocolNumber)) {
+    if(!protocols.count(protocolNumber)) {
         printf("ERROR: Protocol %i not supported yet!\n",protocolNumber);
         exit(1);
     }
 
-    ProtocolMode protocol = *protocols[protocolNumber];
+    ProtocolInfo protocol = protocols[protocolNumber];
 
     printf("Protocol detected: %i (%s)\n",protocolNumber,protocol.name.c_str());
 
@@ -97,39 +98,11 @@ int main(int argc, const char** argv) {
     while(packetStream.hasMorePackets()) {
         Packet newPacket = *packetStream.next();
         
-        printf("Processing: %s / %s [%f%%] at time %.3lfs/%.3lfs (%s packets and %s unknown packet types)\r",printFileSize(packetStream.currentLocation),printFileSize(packetStream.filesize),100*(packetStream.currentLocation/(float)packetStream.filesize),newPacket.timestamp/1000.0,replayTotalLength/1000.0,printBigNum(chunks),printBigNum(unknownPackets.size()));
+        printf("Loading: %s / %s [%f%%] at time %.3lfs/%.3lfs (%s packets)\r",printFileSize(packetStream.currentLocation),printFileSize(packetStream.filesize),100*(packetStream.currentLocation/(float)packetStream.filesize),newPacket.timestamp/1000.0,replayTotalLength/1000.0,printBigNum(chunks));
         std::cout << std::flush;
-
+        
         fprintf(fileOutput,"\n");
         chunks++;
     }
-    printf("\n\nUnknown packet IDs (please report to GitHub): \n");
-    std::unordered_map<uint32_t,uint32_t> maximum;
-    uint32_t max = 0;
-    for(std::set<uint64_t>::iterator i = unknownPackets.begin(); i != unknownPackets.end(); i++) {
-        uint64_t x = (*i);
-        if(maximum.count(x>>32)==0) {
-            maximum[x>>32]=0;
-        }
-        maximum[x>>32]=((x&0xffffffff)>maximum[x>>32])?x&0xffffffff:maximum[x>>32];
-        max=(x>>32)>max?x>>32:max;
-    }
-    for(int i = 0; i <= max; i++) {
-        if(maximum.count(i)==0) {continue;}
-        if(!protocol.functionDefined(i)) {
-            printf("UNKNOWN%X",i);
-        } else {
-            printf("%s",(*protocol[i]).name.c_str());
-        }
-        printf(": ");
-        for(int j = 0; j <= maximum[i]; j++) {
-            for(uint64_t x : unknownPackets) {
-                if((x>>32)!=i) {continue;}
-                if((x&0xffffffff)!=j) {continue;}
-                printf("%X ",j);
-                break;
-            }
-        }
-        printf("\n");
-    }
+    printf("\nFinished\n");
 }

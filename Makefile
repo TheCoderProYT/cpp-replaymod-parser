@@ -12,6 +12,10 @@ rm_parser: ${OBJECTS} Makefile
 clean: 
 	-rm -rv bin
 
+bin/main.o: main.cpp Protocols/Protocols.hpp
+	-mkdir bin
+	${COMPILER} -c $< -o $@
+	
 bin/%.o: %.cpp %.hpp
 	-mkdir bin
 	${COMPILER} -c $< -o $@
