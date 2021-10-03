@@ -26,21 +26,20 @@
 #include <set>
 #include <cstring>
 #include <unordered_map>
+#include <chrono>
 
-#include "main.hpp"
 #include "State.hpp"
 #include "PacketStream.hpp"
 #include "JSONObject.hpp"
 #include "ProtocolInformation.hpp"
 #include "PrintBigNumbers.hpp"
-#include "Protocols/Protocols.hpp"
 
 extern std::unordered_map<uint32_t,ProtocolInfo> protocols;
 
 State currentState;
 PacketStream packetStream;
 
-FILE* fileOutput;
+char* buf = (char*)malloc(65536);
 
 int main(int argc, const char** argv) {
     if(argc<2) {
@@ -48,7 +47,8 @@ int main(int argc, const char** argv) {
         exit(0);
     }
 
-    fileOutput = fopen("out.txt", "w");
+    currentState.fileOutput = fopen("out.txt","w");
+
 
     size_t filesize;
 
@@ -95,14 +95,29 @@ int main(int argc, const char** argv) {
 
     size_t chunks = 0;
 
+    int printerCounter = 0;
+
+    auto start = std::chrono::steady_clock::now();
+    
     while(packetStream.hasMorePackets()) {
+        if(++printerCounter==100) {printerCounter=0;}
         Packet newPacket = *packetStream.next();
         
         printf("Loading: %s / %s [%f%%] at time %.3lfs/%.3lfs (%s packets)\r",printFileSize(packetStream.currentLocation),printFileSize(packetStream.filesize),100*(packetStream.currentLocation/(float)packetStream.filesize),newPacket.timestamp/1000.0,replayTotalLength/1000.0,printBigNum(chunks));
         std::cout << std::flush;
         
-        fprintf(fileOutput,"\n");
+        newPacket.run(&currentState);
+        
+        fprintf(currentState.fileOutput,"\n");
         chunks++;
     }
-    printf("\nFinished\n");
+
+    auto end = std::chrono::steady_clock::now();
+
+    uint64_t length = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+
+    printf("Finished\n");
+    printf("%s packets done in %llu.%09llu seconds\n",printFileSize(chunks),(length/1000000000l),(length%1000000000l));
+    fflush(currentState.fileOutput);
+    fclose(currentState.fileOutput);
 }

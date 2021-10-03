@@ -3,8 +3,13 @@
 #include <string>
 #include <cstdint>
 #include <unordered_map>
+#include "State.hpp"
 
-typedef void (*packet_parsing_func)(void);
+#include "Packet.hpp"
+
+class Packet;
+
+typedef bool (*packet_parsing_func)(Packet*,State*);
 
 class ProtocolFunction {
 public:
@@ -14,7 +19,7 @@ public:
     ProtocolFunction();
     ProtocolFunction(std::string,packet_parsing_func);
     ~ProtocolFunction();
-    void operator()();
+    void operator()(Packet*,State*);
 };
 
 struct ProtocolMode {

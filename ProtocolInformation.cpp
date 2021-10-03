@@ -13,8 +13,8 @@ ProtocolFunction::~ProtocolFunction() {
 
 }
 
-void ProtocolFunction::operator()() {
-    function();
+void ProtocolFunction::operator()(Packet* a,State* b) {
+    function(a,b);
 }
 
 ProtocolMode::ProtocolMode() {

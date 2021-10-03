@@ -1,14 +1,16 @@
 #pragma once
 
 #include <cstdint>
+#include <fstream>
+#include <unordered_map>
+#include "CustomTypes.hpp"
+#include <vector>
 
-class State {
-private:
+struct State {
     uint32_t connectionMode = 2;
-public:
-    State();
-    ~State();
-
-    uint32_t getConnectionMode();
-    void setConnectionMode(uint32_t);
+    FILE* fileOutput;
+    std::vector<User> players;
+    
+    State() {};
+    ~State() {};
 };

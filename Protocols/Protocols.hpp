@@ -2,10 +2,7 @@
 #include "../ProtocolInformation.hpp"
 #include <unordered_map>
 
-std::unordered_map<uint32_t,ProtocolInfo> protocols = {
-    {756,{
-        "1.17.1",{
-            
-        }
-    }},
-};
+#include "Packets/756_2_2.hpp"
+#include "Packets/756_3_21.hpp"
+
+extern std::unordered_map<uint32_t,ProtocolInfo> protocols;
