@@ -7,11 +7,13 @@
 class PacketStream {
 private:
     bool fileLoaded = false;
-    std::ifstream inputFile;
+    FILE* inputFile;
     
     uint32_t packetIDs = 0;
 
     uint32_t protocolNumber;
+
+    uint8_t* data;
 public:
     size_t filesize = 0;
     char* filesizeString;

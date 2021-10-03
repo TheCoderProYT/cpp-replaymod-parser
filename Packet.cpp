@@ -26,7 +26,7 @@ bool Packet::run(State* state_) {
     fprintf(state.fileOutput,"%s | ",pMode->name.c_str());
     
     if(!pMode->functionDefined(protocolID)) {
-        fprintf(state.fileOutput,"FUNCTION UNDEFINED");
+        fprintf(state.fileOutput,"FUNCTION UNDEFINED\n");
         return false;
     }
 
