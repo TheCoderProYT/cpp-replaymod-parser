@@ -14,6 +14,9 @@ bool PacketStream::loadFile(std::string filename) {
     inputFile.seekg(0,std::ios::end);
     filesize = inputFile.tellg();
     inputFile.seekg(0,std::ios::beg);
+
+    filesizeString = printFileSize(filesize);
+
     return true;
 }
 

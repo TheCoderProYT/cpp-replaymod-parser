@@ -85,8 +85,8 @@ int main(int argc, const char** argv) {
 
     packetStream.setProtocolNumber(protocolNumber);
 
-    double replayTotalLength;
-    sscanf(metaDataJSON["duration"].c_str(),"%lf",&replayTotalLength);
+    uint32_t replayTotalLength;
+    sscanf(metaDataJSON["duration"].c_str(),"%u",&replayTotalLength);
     printf("Total replay duration: %.3f seconds\n",replayTotalLength/1000.0);
 
     packetStream.loadFile(std::string(argv[1])+"/recording.tmcpr");
@@ -100,14 +100,13 @@ int main(int argc, const char** argv) {
     auto start = std::chrono::steady_clock::now();
     
     while(packetStream.hasMorePackets()) {
-        if(++printerCounter==100) {printerCounter=0;}
         Packet newPacket = *packetStream.next();
-        
-        printf("Loading: %s / %s [%f%%] at time %.3lfs/%.3lfs (%s packets)\r",printFileSize(packetStream.currentLocation),printFileSize(packetStream.filesize),100*(packetStream.currentLocation/(float)packetStream.filesize),newPacket.timestamp/1000.0,replayTotalLength/1000.0,printBigNum(chunks));
-        std::cout << std::flush;
-        
+        if(++printerCounter==100) {
+            printf("Loading: %s / %s [%f%%] at time %ums/%ums [%f%%] %s packets\r",printFileSize(packetStream.currentLocation),packetStream.filesizeString,100*(packetStream.currentLocation/(float)packetStream.filesize),newPacket.timestamp,replayTotalLength,100*(newPacket.timestamp/(float)replayTotalLength),printBigNum(chunks));
+            std::cout << std::flush;
+            printerCounter=0;
+        }
         newPacket.run(&currentState);
-        
         fprintf(currentState.fileOutput,"\n");
         chunks++;
     }
@@ -116,8 +115,8 @@ int main(int argc, const char** argv) {
 
     uint64_t length = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
-    printf("Finished\n");
-    printf("%s packets done in %llu.%09llu seconds\n",printFileSize(chunks),(length/1000000000l),(length%1000000000l));
+    printf("\033[KFinished\n");
+    printf("%s packets done in %llu.%09llu seconds\n",printBigNum(chunks),(length/1000000000l),(length%1000000000l));
     fflush(currentState.fileOutput);
     fclose(currentState.fileOutput);
 }

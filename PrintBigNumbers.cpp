@@ -17,7 +17,7 @@ std::string bigNumSuffixes[5] = {
 
 char * printFileSize(size_t fileSize) {
     float fsD = (float)fileSize;
-    char* buf = new char[256];
+    char* buf = (char*)malloc(10);
     long size = 1;
     for(int i = 0; i < 5; i++) {
         if((fileSize < size*1000) || (i == 4)) {
@@ -30,7 +30,7 @@ char * printFileSize(size_t fileSize) {
 }
 char * printBigNum(size_t num) {
     float nD = (float)num;
-    char* buf = new char[256];
+    char* buf = (char*)malloc(10);
     long size = 1;
     for(int i = 0; i < 5; i++) {
         if((num < size*1000) || (i == 4)) {

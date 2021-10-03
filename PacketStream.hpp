@@ -14,6 +14,8 @@ private:
     uint32_t protocolNumber;
 public:
     size_t filesize = 0;
+    char* filesizeString;
+
     size_t currentLocation = 0;
 public:
     PacketStream();
